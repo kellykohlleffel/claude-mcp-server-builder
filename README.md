@@ -1,4 +1,4 @@
-# Claude MCP Server Builder
+# MCP Server Builder for Claude Desktop
 
 > Build ready-to-use MCP servers for Claude Desktop with ready-to-use system prompts and workflows
 
