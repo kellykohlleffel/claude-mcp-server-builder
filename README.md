@@ -54,7 +54,7 @@ That's it! Claude guides you through the rest.
 | File | Purpose | Size |
 |------|---------|------|
 | **[QUICKSTART.md](QUICKSTART.md)** | Get started in 5 minutes | 5 min read |
-| **[docs/SYSTEM_INSTRUCTIONS.md](docs/SYSTEM_INSTRUCTIONS.md)** | Complete system prompt (900 lines) | Complete guide |
+| **[docs/SYSTEM_INSTRUCTIONS.md](docs/SYSTEM_INSTRUCTIONS.md)** | Complete system prompt | Complete guide |
 | **[docs/USER_PROMPT_TEMPLATE.md](docs/USER_PROMPT_TEMPLATE.md)** | Copy-paste prompt templates | Quick reference |
 | **[docs/PROJECT_SETUP.md](docs/PROJECT_SETUP.md)** | Detailed project configuration | Deep dive |
 
