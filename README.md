@@ -6,7 +6,7 @@
 [![Claude](https://img.shields.io/badge/Claude-Desktop-blue)](https://claude.ai/download)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
 
-Stop wrestling with MCP server configuration, path problems, and setup. This repository provides comprehensive system instructions that enable Claude (or any LLM) to guide you through building your first (of many) MCP servers.
+This repository provides comprehensive system instructions that enable Claude (or any LLM that supports projects) to guide you through building your first (of hopefully many) MCP servers.
 
 ## ✨ Features
 
