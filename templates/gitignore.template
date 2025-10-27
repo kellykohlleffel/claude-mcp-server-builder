@@ -1,0 +1,45 @@
+# MCP Server .gitignore
+
+# Environment & Secrets - NEVER COMMIT!
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs & Temp
+*.log
+*.tmp
+tmp/
+logs/
+
+# Claude local settings
+claude/
+.claude/

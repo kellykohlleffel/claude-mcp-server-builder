@@ -1,0 +1,35 @@
+# MCP Server - Core Requirements
+
+# MCP Framework (recommended)
+fastmcp>=0.2.0
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# HTTP Client (choose one)
+requests>=2.31.0          # Simple, synchronous
+# httpx>=0.25.0           # Async with HTTP/2 support
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Code Quality (optional)
+# black>=23.0.0           # Code formatting
+# ruff>=0.1.0             # Fast linting
+
+# =============================================================================
+# Add service-specific dependencies below:
+# =============================================================================
+
+# Database (uncomment as needed)
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymongo>=4.5.0          # MongoDB
+
+# Cloud (uncomment as needed)
+# boto3>=1.28.0           # AWS
+# google-cloud-storage>=2.10.0  # GCP
+
+# Data Processing (uncomment as needed)
+# pandas>=2.1.0
+# pydantic>=2.4.0         # Data validation
