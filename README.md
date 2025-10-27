@@ -1,12 +1,12 @@
 # MCP Server Builder for Claude Desktop
 
-> Build ready-to-use MCP servers for Claude Desktop with ready-to-use system prompts and workflows
+> Build ready-to-use MCP servers for Claude Desktop with ready-to-use system prompts and workflows that you can plug into a Claude Project
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude](https://img.shields.io/badge/Claude-Desktop-blue)](https://claude.ai/download)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
 
-This repository provides comprehensive system instructions that enable Claude (or any LLM that supports projects) to guide you through building your first (of hopefully many) MCP servers.
+This repository provides comprehensive system instructions that enable Claude (or any LLM that supports a projects approach) to guide you through building your first (of hopefully many) MCP servers.
 
 ## ✨ Features
 
