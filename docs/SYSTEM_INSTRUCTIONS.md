@@ -222,16 +222,18 @@ When building workflow-oriented MCP servers with multiple embedded API clients (
 
 **Apply these patterns when:**
 - ✅ Building workflow servers that orchestrate multiple APIs/services
-- ✅ Server will be called frequently (monitoring, health checks, status queries)
-- ✅ Responses include data from multiple sources
-- ✅ Users need to run many checks per conversation
-- ✅ Token efficiency is a priority (cost, speed, context window)
+- ✅ Server will be called frequently (>10 times per conversation expected)
+- ✅ Responses include data from multiple sources (3+ API calls per workflow)
+- ✅ Users need to run many checks per conversation (monitoring, troubleshooting)
+- ✅ Token efficiency is a priority (cost, speed, context window management)
+- ✅ **Making claims about efficiency** (e.g., "95% token reduction") that need verification
 
 **Standard approach is fine when:**
 - ✅ Building simple single-API wrappers
-- ✅ Infrequent usage (admin tasks, one-off operations)
-- ✅ Complete data always needed (no "health check" use case)
+- ✅ Infrequent usage (admin tasks, one-off operations, <5 calls per conversation)
+- ✅ Complete data always needed (no "health check" vs "detailed" use case)
 - ✅ Small response payloads (<1000 tokens each)
+- ✅ Not making efficiency claims that need proof
 
 ### Core Optimization Principles
 
@@ -463,6 +465,74 @@ Don't over-optimize when:
 
 ---
 
+### Token Transparency & Self-Reporting (For Optimized Workflow Servers)
+
+**CRITICAL for workflow servers:** Tools must report their own token usage because Claude cannot accurately distinguish between tool response tokens and total conversation tokens. This is an advanced pattern for specific use cases, not a universal requirement.
+
+**The Problem:**
+When users ask "How many tokens did that use?", Claude reports total conversation tokens (including Claude's reasoning, tool schemas, conversation history) rather than just the tool response tokens. This makes optimization verification impossible.
+
+**The Solution:**
+Build token tracking directly into tool responses:
+```python
+def _format_response(result: dict) -> str:
+    """Format response with self-reported token usage"""
+    
+    # Build the main response
+    response = create_response_content(result)
+    
+    # Calculate per-component token usage
+    component_tokens = {}
+    for component_name, component_data in result.items():
+        component_json = json.dumps(component_data, indent=2)
+        component_tokens[component_name] = len(component_json) // 4
+    
+    # Add token breakdown to response
+    response.append("\n📊 Token Usage Analysis:")
+    response.append("-" * 60)
+    for component, tokens in component_tokens.items():
+        response.append(f"  {component.upper():15} ~{tokens:3} tokens")
+    
+    total_tokens = sum(component_tokens.values())
+    response.append(f"  {'TOTAL':15} ~{total_tokens:3} tokens")
+    response.append(f"  💡 Optimization: {percentage}% reduction")
+    
+    return "\n".join(response)
+```
+
+**When to Self-Report:**
+- ✅ Workflow servers with optimization claims
+- ✅ Health check tools that run frequently
+- ✅ Any tool where token efficiency is a selling point
+- ✅ Complex multi-stage operations
+
+**Benefits:**
+1. **Transparency** - Users see exact tool token consumption
+2. **Verification** - Can validate optimization claims in real-time
+3. **Debugging** - Quickly identify token-heavy components
+4. **Trust** - No confusion about Claude's conversation estimates
+5. **Data-driven optimization** - Know exactly where tokens are spent
+
+**Testing Pattern:**
+```python
+# test_token_usage.py
+def test_actual_token_usage():
+    result = tool_function()
+    formatted = format_response(result)
+    
+    char_count = len(formatted)
+    token_estimate = char_count // 4
+    
+    print(f"Actual tokens: ~{token_estimate}")
+    
+    # Per-component breakdown
+    for component, data in result.items():
+        tokens = len(json.dumps(data)) // 4
+        print(f"{component}: ~{tokens} tokens")
+```
+
+**Trade-off:** Adds ~15-20 tokens to response, but worth it for transparency and verification.
+
 ## Reference Implementation: Fivetran MCP Server
 
 You have access to a production-grade reference implementation built with **FastMCP** with 53 tools across 8 categories:
@@ -607,17 +677,19 @@ async def explore_item(
 
 ```
 service-mcp-server/
-├── venv/                      # Virtual environment
-├── .env                       # Environment variables (gitignored)
-├── .env.example              # Template for environment variables
-├── .gitignore                # Ignore venv, .env, __pycache__
-├── requirements.txt          # Python dependencies
-├── QUICKSTART.md             # Minimal setup guide (create this first)
-├── test_client.py            # Test API client independently (CREATE FIRST)
-├── test_server.py            # Test MCP server tools locally (CREATE EARLY)
-├── service_client.py         # API client logic (granular methods OK)
-├── service_mcp_server.py     # MCP server with AGENT-CENTRIC tools
-└── run_server.py             # Entry point for Claude Desktop
+├── venv/                       # Virtual environment
+├── .env                        # Environment variables (gitignored)
+├── .env.example                # Template for environment variables
+├── .gitignore                  # Ignore venv, .env, __pycache__
+├── requirements.txt            # Python dependencies
+├── QUICKSTART.md               # Minimal setup guide (create this first)
+├── test_client.py              # Test API client independently (CREATE FIRST)
+├── test_server.py              # Test MCP server tools locally (CREATE EARLY)
+├── test_token_usage.py         # Measure token consumption (FOR WORKFLOW SERVERS)
+├── test_actual_mcp_response.py # Verify formatted response sizes (FOR OPTIMIZATION)
+├── service_client.py           # API client logic (granular methods OK)
+├── service_mcp_server.py       # MCP server with AGENT-CENTRIC tools
+└── run_server.py               # Entry point for Claude Desktop
 ```
 
 **Documentation Philosophy:**
@@ -628,7 +700,8 @@ service-mcp-server/
 **Testing Philosophy:**
 - ✅ **test_client.py first** - Test API before building MCP server
 - ✅ **test_server.py early** - Test MCP tools without Claude Desktop
-- ✅ **Claude Desktop last** - Only after both test files pass
+- ✅ **test_token_usage.py** - Measure actual token consumption for workflow servers
+- ✅ **Claude Desktop last** - Only after all test files pass
 
 **Why flat structure?**
 - ✅ Simpler imports (`from service_client import ServiceClient`)
@@ -751,6 +824,15 @@ Good design: Each server has consolidated tools that return complete context:
 - [ ] Token usage documented in tool descriptions
 - [ ] Measured token savings vs unoptimized approach
 - [ ] Target: <2,000 tokens for routine health checks
+
+**Token Transparency Checklist (for workflow servers with optimization):**
+- [ ] Self-reported token usage implemented in tool responses
+- [ ] Per-component/per-stage breakdown included
+- [ ] Test script validates actual token measurements
+- [ ] Optimization percentages calculated from real measurements
+- [ ] Tool descriptions mention token efficiency with actual numbers
+- [ ] Before/after comparisons documented with verification
+- [ ] Users can verify claims without external tools
 
 ## Decision Matrix: Custom vs Managed
 
@@ -976,10 +1058,11 @@ logger.warning(f"Rate limit approaching: {remaining_calls}")
 8. **Absolute Paths Always** - Critical for Claude Desktop config
 9. **Comprehensive Error Handling** - Every API call wrapped with helpful, actionable messages
 10. **Clear Tool Descriptions** - Explain WHEN to use each tool and what workflows it enables
-11. **Test Each Stage** - Use test_client.py → test_server.py → Claude Desktop
-12. **Document After Testing** - Create QUICKSTART.md initially, then comprehensive docs after server works
-13. **Security First** - Never commit credentials, use .env files
-14. **Consolidate Thoughtfully** - Related operations that always happen together should be one tool
+11. **Test Each Stage** - Use test_client.py → test_server.py → test_token_usage.py → Claude Desktop
+12. **Document After Testing** - Create QUICKSTART.md initially, then comprehensive docs after server works AND token usage is verified
+13. **Prove Efficiency Claims** - Self-report token usage so users can verify optimization
+14. **Security First** - Never commit credentials, use .env files
+15. **Consolidate Thoughtfully** - Related operations that always happen together should be one tool
 
 ## Helper Scripts (Optional)
 

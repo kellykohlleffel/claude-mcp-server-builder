@@ -1,19 +1,22 @@
 # MCP Server Builder for Claude Desktop
 
-> Build ready-to-use MCP servers for Claude Desktop with ready-to-use system prompts and workflows that you can plug into a Claude Project
+> Build production-ready MCP servers for Claude Desktop with comprehensive system prompts and test-driven workflows
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude](https://img.shields.io/badge/Claude-Desktop-blue)](https://claude.ai/download)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
 
-This repository provides comprehensive system instructions that enable Claude (or any LLM that supports a projects approach) to guide you through building your first (of hopefully many) MCP servers.
+This repository provides comprehensive system instructions that enable Claude (or any LLM that supports a projects approach) to guide you through building production-ready MCP servers with agent-centric design and optional token optimization.
 
 ## ✨ Features
 
+- **🎯 Agent-Centric Design** - Workflow-oriented tools that minimize Claude's orchestration burden
 - **🧪 Test-Driven Development** - Validate APIs before building MCP servers
 - **⚡ FastMCP-First** - Use the fastest path for 90% of use cases
 - **📁 Flat Structure** - Simple project layout that scales when needed
 - **🔄 Local Testing** - Test tools without Claude Desktop restarts
+- **⚡ Token Optimization** - Optional patterns for workflow servers (90-99% reduction)
+- **📊 Token Transparency** - Self-reporting for optimized servers
 - **📚 Production Patterns** - Based on real servers with 50+ tools in production
 - **🎯 Step-by-Step Guidance** - Claude walks you through every stage
 
@@ -39,6 +42,7 @@ Get your first MCP server running in **2-4 hours**:
    - Type: [REST API / Database / SaaS]
    - Authentication: [API key / OAuth / etc]
    - Key operations: [list 3-5 things]
+   - Usage pattern: [How often will this be called?]
    
    Let's start with test_client.py.
    ```
@@ -72,7 +76,7 @@ That's it! Claude guides you through the rest.
          │ ✅ Pass
          ▼
 ┌─────────────────┐
-│   Build Server  │  ← Create MCP server with FastMCP
+│   Build Server  │  ← Create MCP server with agent-centric tools
 └────────┬────────┘
          │
          ▼
@@ -82,36 +86,79 @@ That's it! Claude guides you through the rest.
          │ ✅ Pass
          ▼
 ┌─────────────────┐
+│test_token_usage │  ← Optional: Measure tokens (workflow servers)
+└────────┬────────┘
+         │ ✅ Pass
+         ▼
+┌─────────────────┐
 │ Claude Desktop  │  ← Full integration
 └─────────────────┘
 ```
 
-**Key Principle:** Never build what you haven't tested.
+**Key Principles:**
+- Never build what you haven't tested
+- Design for workflows, not API endpoints
+- Optimize when it matters (workflow servers)
 
-## 💡 Use Cases
+## 💡 Design Philosophy
+
+### Agent-Centric vs API-Centric
+
+**❌ API-Centric (Avoid):**
+```python
+list_databases()
+list_schemas(database)
+list_tables(database, schema)
+# User: "What's in my warehouse?" → 10-50+ tool calls
+```
+
+**✅ Agent-Centric (Build This):**
+```python
+discover_data_warehouse(resource_type, search_term, filters)
+# User: "What's in my warehouse?" → 1 tool call
+```
+
+### When to Optimize
+
+**Standard Approach:**
+- Simple single-API wrappers
+- Infrequent usage (<5 calls/conversation)
+- Small responses (<1000 tokens)
+
+**Token Optimization:**
+- Workflow servers (orchestrating multiple APIs)
+- Frequent usage (>10 calls/conversation)
+- Large responses (>5000 tokens)
+- Making efficiency claims
+
+**The system instructions guide you on when to apply each approach.**
+
+## 🎓 Use Cases
 
 Build MCP servers for:
 
 ### REST APIs
-- Data services (Fivetran, Census, dbt, Snowflake, Databricks, Google Cloud, AWS, Azure)
-- Payment processing (Stripe, PayPal)
-- Communication (Twilio, SendGrid)
-- Project management (Jira, Linear, Asana)
-- Custom internal APIs
+- **Data Platform**: Fivetran, Census, dbt Cloud, Hightouch
+- **Data Warehouses**: Snowflake, Databricks, BigQuery
+- **Cloud Services**: AWS, GCP, Azure
+- **Workflow**: Jira, Linear, Asana, Monday
+- **Communication**: Slack, Twilio, SendGrid
+- **Custom APIs**: Your internal services
 
 ### Databases
-- PostgreSQL
-- MySQL
-- Snowflake
-- BigQuery
-- MongoDB
+- PostgreSQL, MySQL, Snowflake, BigQuery, MongoDB
+- With agent-centric query tools
 
 ### SaaS Platforms
-- GitHub
-- Slack
-- Notion
-- Google Workspace
-- Microsoft 365
+- GitHub, GitLab, Bitbucket
+- Google Workspace, Microsoft 365
+- Notion, Confluence, SharePoint
+
+### Workflow Servers
+- Pipeline health monitors
+- Cross-service orchestrators
+- Multi-stage data workflows
+- (With built-in token optimization)
 
 ## 🎓 Example: Building a Weather MCP Server
 
@@ -125,50 +172,69 @@ Service details:
   1. Get current weather
   2. Get 5-day forecast
   3. Search cities
+- Usage: Checking weather 5-10 times per conversation
 
 Let's start with test_client.py.
 
 Claude: [Creates test_client.py with OpenWeatherMap API...]
+        [Guides through agent-centric tool design...]
+        [Consolidates related operations...]
 ```
 
-**Result:** Working MCP server in 2-3 hours with proper testing and error handling.
+**Result:** Working MCP server in 2-3 hours with:
+- 3-5 agent-centric tools (not 10+ API-centric tools)
+- Proper testing and error handling
+- Optional optimization if needed
 
 ## 🏗️ What Makes This Different
 
 ### Traditional Approach ❌
 1. Start coding immediately
-2. Fight with paths and configs
-3. Debug in Claude Desktop (slow)
-4. Write documentation (that becomes outdated)
-5. Realize you need to refactor
+2. Wrap every API endpoint as a tool
+3. Fight with paths and configs
+4. Debug in Claude Desktop (slow)
+5. Users need 10+ tool calls for simple tasks
+6. Write documentation (that becomes outdated)
+7. Realize you need to refactor
 
 ### This Approach ✅
 1. Test API first (`test_client.py`)
-2. Build incrementally (MVP → expand)
-3. Test locally (`test_server.py`)
-4. Configure Claude Desktop (once the MCP Server works)
-5. Document after success
+2. Design agent-centric tools (workflows, not endpoints)
+3. Build incrementally (MVP → expand)
+4. Test locally (`test_server.py`)
+5. Users accomplish tasks in 1-2 tool calls
+6. Configure Claude Desktop (once it works)
+7. Optional: Optimize and verify token usage
+8. Document after success
 
 ## 📊 Testing Philosophy
 
-### Three-Phase Testing
+### Three (or Four) Phase Testing
 
 1. **test_client.py** - API validation
    - Authenticates successfully
    - Makes actual API calls
    - Handles errors gracefully
-   - Provides actionable feedback
+   - Tests both full and lightweight methods (if optimizing)
 
 2. **test_server.py** - Tool validation
    - Tests MCP tools directly
    - Validates JSON responses
    - Checks error handling
+   - Verifies tool consolidation works
    - No Claude Desktop required
 
-3. **Claude Desktop** - Integration
+3. **test_token_usage.py** - Token measurement (optional, for workflow servers)
+   - Measures actual token consumption
+   - Validates optimization claims
+   - Provides per-component breakdown
+   - Enables data-driven decisions
+
+4. **Claude Desktop** - Integration
    - Full end-to-end testing
    - Natural language interface
    - Production validation
+   - Real-world workflow testing
 
 ## 🛠️ Technology Stack
 
@@ -190,7 +256,7 @@ Claude: [Creates test_client.py with OpenWeatherMap API...]
 
 ### Getting Started
 1. [Quick Start Guide](QUICKSTART.md) - 5 minutes to first prompt
-2. [System Instructions](docs/SYSTEM_INSTRUCTIONS.md) - Complete guide
+2. [System Instructions](docs/SYSTEM_INSTRUCTIONS.md) - Complete guide with agent-centric patterns
 3. [Project Setup](docs/PROJECT_SETUP.md) - Detailed configuration
 
 ### Reference
@@ -202,42 +268,18 @@ Claude: [Creates test_client.py with OpenWeatherMap API...]
 - [Claude Desktop Download](https://claude.ai/download)
 - [FastMCP Documentation](https://github.com/jlowin/fastmcp)
 
-## 🤝 Contributing
-
-Contributions welcome! Here's how you can help:
-
-- **Share your patterns** - Built an interesting MCP server? Share it!
-- **Improve documentation** - Found something unclear? Submit a PR!
-- **Report issues** - Something not working? Open an issue!
-- **Add examples** - Built something cool? Add it to `examples/`
-
-### Contribution Guidelines
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-pattern`)
-3. Commit your changes (`git commit -m 'Add amazing pattern'`)
-4. Push to the branch (`git push origin feature/amazing-pattern`)
-5. Open a Pull Request
-
 ## 🗺️ Roadmap
 
 ### Current (v1.0)
 - ✅ Complete system instructions
+- ✅ Agent-centric design patterns
 - ✅ Test-driven workflow
 - ✅ FastMCP-first approach
+- ✅ Token optimization patterns (optional)
+- ✅ Token transparency for workflow servers
 - ✅ Comprehensive documentation
 
-### Planned
-- 📋 Example implementations
-- 📋 Video walkthrough tutorials
-- 📋 Troubleshooting database
-- 📋 Community patterns repository
-- 📋 Advanced orchestration guides
-
-## 💬 Community & Support
-
-- **Questions?** Open a [GitHub Discussion](https://github.com/YOUR_USERNAME/claude-mcp-server-builder/discussions)
-- **Issues?** Submit a [GitHub Issue](https://github.com/YOUR_USERNAME/claude-mcp-server-builder/issues)
+### Future (TBD)
 
 ## 📜 License
 
@@ -245,10 +287,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built on patterns from production MCP servers
-- Inspired by the Model Context Protocol community
+- Built on patterns from multiple MCP servers
+- Inspired by real-world token optimization challenges (99% reduction achieved)
 - Powered by Claude and FastMCP
+- Thanks to the Model Context Protocol community
 - Thanks to all contributors and early adopters
+
+## 🌟 Success Stories
+
+This system instruction approach has been used to build:
+- **Pipeline Health Monitor** - 98.9% token reduction (37,795 → 421 tokens per check)
+- **Multi-service orchestrators** - 5 APIs, 1 tool call
+- **Data platform explorers** - Complete data platform visibility in 1-2 calls
 
 ## ⭐ Show Your Support
 
