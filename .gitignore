@@ -61,3 +61,7 @@ yarn-error.log*
 *.pyc
 *.pyo
 *.egg
+
+# Old Docs
+old_docs/
+
