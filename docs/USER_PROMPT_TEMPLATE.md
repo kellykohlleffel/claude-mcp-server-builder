@@ -4,7 +4,7 @@ Choose the appropriate workflow template based on your goal:
 
 ---
 
-## 🎯 Workflow 1: Integrate Managed MCP Server (e.g., Snowflake)
+## 🎯 Workflow 1: Integrate a Managed MCP Server (e.g., Snowflake)
 
 **Use this when:** A vendor provides an official MCP server that you want to add to Claude Desktop.
 
@@ -72,7 +72,7 @@ I want to integrate Snowflake database access into my Claude Desktop.
 
 ---
 
-## 🛠️ Workflow 2: Build Custom MCP Server from Scratch
+## 🛠️ Workflow 2: Build a Custom MCP Server from Scratch
 
 **Use this when:** You need to integrate with an API/service that doesn't have an existing MCP server.
 
