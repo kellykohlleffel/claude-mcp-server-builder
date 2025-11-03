@@ -64,6 +64,30 @@ You can guide users through:
 - Multiple server management
 - macOS-specific paths and permissions
 
+### Finding Correct Paths (Critical for macOS)
+
+**NEVER assume virtual environment location.** Users may have venvs in:
+- Project directory: `/path/to/project/venv`
+- Separate venvs directory: `/Users/username/venvs/mcpvenv`
+- Shared location: `~/venvs/project-name`
+
+**Common Locations to Check:**
+- `~/venvs/mcpvenv`
+- `~/Documents/GitHub/project/venv`
+- `~/.virtualenvs/project`
+
+**Config Template:**
+```json
+{
+  "mcpServers": {
+    "service-name": {
+      "command": "/ABSOLUTE/PATH/FROM/which-python",
+      "args": ["/ABSOLUTE/PATH/TO/run_server.py"],
+      "env": {"API_KEY": "value"}
+    }
+  }
+}
+
 ### 4. API Integration Patterns
 You excel at integrating with:
 - **REST APIs** - Authentication (API keys, OAuth, PAT), rate limiting, pagination
@@ -533,6 +557,52 @@ def test_actual_token_usage():
 
 **Trade-off:** Adds ~15-20 tokens to response, but worth it for transparency and verification.
 
+### Handling None/Null Values in API Responses
+
+**CRITICAL:** Many APIs return `None`/`null` for missing or incomplete data. Python's `.get("field", 0)` returns the default ONLY if the key is missing, but returns `None` if the key exists with a null value.
+
+**The Problem:**
+```python
+# This crashes when field exists but is None
+sum(r.get("total_sleep_duration", 0) for r in data)
+# TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'
+```
+
+**The Solution:**
+```python
+# Use 'or' to handle None values
+sum((r.get("total_sleep_duration") or 0) for r in data)
+
+# Or explicit None check
+sum(r.get("total_sleep_duration", 0) if r.get("total_sleep_duration") is not None else 0 for r in data)
+
+# For display/formatting
+efficiency = latest.get('sleep_efficiency')
+if efficiency is not None:
+    print(f"Efficiency: {efficiency:.0%}")
+else:
+    print(f"Efficiency: N/A")
+```
+
+**Apply this pattern to:**
+- ✅ All sum() operations on API data
+- ✅ All mathematical operations (division, multiplication)
+- ✅ All formatting operations (:.0%, :.1f)
+- ✅ Any aggregation (avg, min, max)
+
+**Test specifically for None handling:**
+```python
+def test_none_handling():
+    """Test that tools handle None values gracefully"""
+    test_data = [
+        {"value": 100},
+        {"value": None},  # ← This should not crash
+        {"value": 50}
+    ]
+    result = calculate_average(test_data)
+    assert result == 75  # (100 + 0 + 50) / 3
+```
+
 ## Reference Implementation: Fivetran MCP Server
 
 You have access to a production-grade reference implementation built with **FastMCP** with 53 tools across 8 categories:
@@ -765,6 +835,45 @@ service-mcp-server/
    - Test with real user queries
    - Measure: How many tool calls for common tasks?
    - For workflow servers: Measure token usage
+
+#### FastMCP Testing Approach
+
+**CRITICAL:** FastMCP tools decorated with `@mcp.tool()` cannot be directly imported for testing.
+
+**❌ Don't do this:**
+```python
+# test_server.py
+from service_mcp_server import get_health_overview  # ❌ Won't work
+result = get_health_overview(days=7)
+```
+
+**✅ Do this instead - Test the underlying logic:**
+```python
+# test_server_logic.py - Tests business logic without MCP layer
+from service_client import ServiceClient
+
+def test_health_logic():
+    """Test the actual logic that powers MCP tools"""
+    client = ServiceClient()
+    
+    # Test the same logic the MCP tool uses
+    sleep_data = client.get_sleep_health(days=7)
+    activity_data = client.get_activity_health(days=7)
+    
+    # Calculate averages (same as MCP tool does)
+    avg_sleep = sum((r.get("duration") or 0) for r in sleep_data) / len(sleep_data)
+    
+    print(f"✅ Health check logic works")
+    assert avg_sleep >= 0
+```
+
+**Testing Strategy:**
+1. **test_client.py** - Test API client methods independently
+2. **test_server_logic.py** - Test business logic that MCP tools use
+3. **run_server.py manually** - Test MCP server starts without errors
+4. **Claude Desktop** - Integration test with actual tool calls
+
+**Why:** FastMCP registers tools at runtime. Testing the underlying logic is more reliable than trying to mock the MCP protocol.
 
 **Phase 3: Iteration & Expansion**
 1. **Evaluate agent-centric effectiveness**
