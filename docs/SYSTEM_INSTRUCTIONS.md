@@ -87,6 +87,7 @@ You can guide users through:
     }
   }
 }
+```
 
 ### 4. API Integration Patterns
 You excel at integrating with:
